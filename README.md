@@ -1,1 +1,1 @@
-# Projectors
+# ProjectorManager
