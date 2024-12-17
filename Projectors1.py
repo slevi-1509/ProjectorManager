@@ -3,10 +3,7 @@ import socket
 import os
 import csv
 import time
-import sys
-import psutil
 from tkinter import *
-from threading import Timer
 from pypjlink import *
 from tkinter import messagebox
 from tendo import singleton
@@ -34,11 +31,8 @@ def showOffButton(color):
     offButton.place(x=130, y=10)
 
 
-"""
-    check if projector is alive using ping
-"""
 
-
+# check if projector is alive using ping
 def checkifalive():
     global pingstatus
     pingstatus = ""
@@ -59,7 +53,7 @@ def connectProjector():
         projector = Projector.from_address(projectorIP)
     except:
         win.Tk().withdraw()
-        win.messagebox.showwarning("תקלה", "הכתובת אינה משוייכת למקרן\nנא לפנות לתמיכה טכנית")
+        win.messagebox.showwarning("תקלה", "לא ניתן להתחבר למקרן\nנא לפנות לתמיכה טכנית")
         os._exit(0)
     projector.authenticate('Angel')
     projectorName = projector.get_name()
@@ -75,7 +69,6 @@ def checkstatus():
         showOffButton("grey")
     else:
         connectProjector()
-        # print(projectorState)
         if projectorState == "off":
             showStatusMessage("המקרן כבוי")
             showOnButton("grey")
@@ -95,8 +88,6 @@ def checkstatus():
             showOnButton("green")
             showOffButton("grey")
     time.sleep(3)
-    # statusTimer = Timer(600, checkstatus)
-    # statusTimer.start()
 
 
 def poweronprojector():
@@ -105,7 +96,6 @@ def poweronprojector():
         showStatusMessage("המקרן לא מחובר")
     else:
         connectProjector()
-        # print(projectorState)
         if projectorState == "off":
             projector.set_power('on')
             showStatusMessage("המקרן דלוק")
@@ -124,7 +114,6 @@ def shutdownprojector():
         showStatusMessage("המקרן לא מחובר")
     else:
         connectProjector()
-        # print(projectorState)
         if projectorState == "on":
             projector.set_power('off')
         showStatusMessage("המקרן כבוי")
@@ -135,7 +124,6 @@ def shutdownprojector():
 
 def on_closing():
     if messagebox.askokcancel("יציאה", "אישור יציאה"):
-        # statusTimer.cancel()
         mainForm.destroy()
         os._exit(0)
 
@@ -145,8 +133,8 @@ try:
 except:
     os._exit(0)
 
-# with open('//BIRAM-2K1/projectors#manager$/projlist.csv') as csv_file:
-with open('C:/Users/Sagiv/OneDrive/python/projlist.csv') as csv_file:
+currentFolder = os.getcwd()
+with open(currentFolder + '/projlist.csv') as csv_file:
     csv_reader = csv.DictReader(csv_file, delimiter=',')
     try:
         result = next(z for z in csv_reader if z["computerName"] == socket.gethostname().upper())
@@ -160,28 +148,19 @@ with open('C:/Users/Sagiv/OneDrive/python/projlist.csv') as csv_file:
 
 mainForm = Tk()
 mainForm.withdraw()
-# mainForm.iconbitmap("//BIRAM-2K1/projectors#manager$/video_projector.ico")
-mainForm.iconbitmap("C:/Users/Sagiv/OneDrive/python/video_projector.ico")
-# p1 = PhotoImage(file='//BIRAM-2K1/projectors#manager$/projectors1icon.png')
-# win.wm_iconbitmap("//BIRAM-2K1/projectors#manager$/projectors1icon.png")
+mainForm.iconbitmap(currentFolder + '/video_projector.ico')
 mainForm.wm_title('ניהול מקרן כיתה')
-# mainForm.geometry('300x200')  # setting the size of the window
+    # mainForm.geometry('300x200')  # setting the size of the window
 Tk_Width = 300
 Tk_Height = 100
 positionRight = int(mainForm.winfo_screenwidth() / 2 - Tk_Width / 2)
 positionDown = int(mainForm.winfo_screenheight() / 2 - Tk_Height / 2)
-# Set window in center screen with following way.
+    # Set window in center screen with following way.
 mainForm.geometry("{}x{}+{}+{}".format(300, 100, positionRight, positionDown))
 mainForm.maxsize(width=300, height=100)
 mainForm.minsize(width=300, height=100)
 statusButton = Button(mainForm, text="Status", width=6, height=1, bg="yellow", command=checkstatus)
 statusButton.place(x=230, y=15)
-# ComputerName = Label(mainForm, width=30, height=1, fg="blue", anchor="w",
-# text="Computer Name: " + socket.gethostname()).place(x=20, y=50)
-# ProjectorName = Label(mainForm, width=30, height=1, fg="blue", anchor="w",
-# text="Projector Name: " + projectorName).place(x=20, y=70)
-# ProjectorIP = Label(mainForm, width=22, height=1, fg="blue", anchor="w",
-# text="Projector IP: " + projectorIP).place(x=20, y=90)
 checkstatus()
 mainForm.deiconify()
 mainForm.protocol("WM_DELETE_WINDOW", on_closing)
